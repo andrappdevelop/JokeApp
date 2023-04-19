@@ -6,16 +6,18 @@ class MainViewModel(
 
     private var textCallback: TextCallback = TextCallback.Empty()
 
+    private val resultCallback = object : ResultCallback<Joke, Error> {
+        override fun provideSuccess(data: Joke) = textCallback.provideText(data.toUi())
+        override fun provideError(error: Error) = textCallback.provideText(error.message())
+    }
+
     fun getJoke() {
         model.fetch()
     }
 
     fun init(textCallback: TextCallback) {
         this.textCallback = textCallback
-        model.init(object : ResultCallback<Joke, Error> {
-            override fun provideSuccess(data: Joke) = textCallback.provideText(data.toUi())
-            override fun provideError(error: Error) = textCallback.provideText(error.message())
-        })
+        model.init(resultCallback)
     }
 
     fun clear() {
