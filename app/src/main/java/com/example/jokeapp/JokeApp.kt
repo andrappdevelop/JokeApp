@@ -10,7 +10,7 @@ class JokeApp : Application() {
         super.onCreate()
         ManageResources.Base(this)
         viewModel = MainViewModel(
-            FakeModel(ManageResources.Base(this))
+            BaseModel(JokeService.Base(), ManageResources.Base(this))
         )
     }
 }
