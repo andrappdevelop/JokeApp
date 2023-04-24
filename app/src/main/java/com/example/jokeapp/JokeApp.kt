@@ -1,6 +1,7 @@
 package com.example.jokeapp
 
 import android.app.Application
+import com.google.gson.Gson
 
 class JokeApp : Application() {
 
@@ -10,7 +11,7 @@ class JokeApp : Application() {
         super.onCreate()
         ManageResources.Base(this)
         viewModel = MainViewModel(
-            BaseModel(JokeService.Base(), ManageResources.Base(this))
+            BaseModel(JokeService.Base(Gson()), ManageResources.Base(this))
         )
     }
 }

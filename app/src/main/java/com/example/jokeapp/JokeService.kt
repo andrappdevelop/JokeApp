@@ -1,5 +1,6 @@
 package com.example.jokeapp
 
+import com.google.gson.Gson
 import java.io.BufferedInputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -10,7 +11,9 @@ interface JokeService {
 
     fun joke(callback: ServiceCallback)
 
-    class Base : JokeService {
+    class Base(
+        private val gson: Gson
+    ) : JokeService {
 
         override fun joke(callback: ServiceCallback) {
             Thread {
@@ -20,7 +23,7 @@ interface JokeService {
                     connection = url.openConnection() as HttpURLConnection
                     InputStreamReader(BufferedInputStream(connection.inputStream)).use {
                         val text = it.readText()
-                        callback.returnSuccess(text)
+                        callback.returnSuccess(gson.fromJson(text, JokeCloud::class.java))
                     }
                 } catch (e: Exception) {
                     if (e is UnknownHostException || e is java.net.ConnectException) {
@@ -42,7 +45,7 @@ interface JokeService {
 
 interface ServiceCallback {
 
-    fun returnSuccess(data: String)
+    fun returnSuccess(data: JokeCloud)
 
     fun returnError(errorType: ErrorType)
 }

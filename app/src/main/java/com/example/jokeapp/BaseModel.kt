@@ -18,8 +18,8 @@ class BaseModel(
     override fun fetch() {
         jokeService.joke(object : ServiceCallback {
 
-            override fun returnSuccess(data: String) {
-                callback?.provideSuccess(Joke(data, ""))
+            override fun returnSuccess(data: JokeCloud) {
+                callback?.provideSuccess(data.toJoke())
             }
 
             override fun returnError(errorType: ErrorType) {
