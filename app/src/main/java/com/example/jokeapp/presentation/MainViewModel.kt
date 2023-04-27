@@ -36,7 +36,9 @@ class MainViewModel(
     }
 
     fun changeJokeStatus() {
-        repository.changeJokeStatus(resultCallback)
+        Thread {
+            repository.changeJokeStatus(resultCallback)
+        }.start()
     }
 }
 
