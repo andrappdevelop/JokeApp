@@ -9,33 +9,33 @@ import com.example.jokeapp.presentation.JokeUi
 import com.example.jokeapp.presentation.ManageResources
 import io.realm.Realm
 
-interface CacheDataSource : DataSource{
+interface CacheDataSource : DataSource {
 
     fun addOrRemove(id: Int, joke: Joke): JokeUi
 
     class Base(
         private val realm: ProvideRealm,
-        manageResources: ManageResources
+        manageResources: ManageResources,
+        private val error: Error = Error.NoFavoriteJoke(manageResources),
+        private val mapper: Joke.Mapper<JokeCache> = ToCache(),
+        private val toFavorite: Joke.Mapper<JokeUi> = ToFavoriteUi(),
+        private val toBaseUi: Joke.Mapper<JokeUi> = ToBaseUi()
     ) : CacheDataSource {
-
-        private val error by lazy {
-            Error.NoFavoriteJoke(manageResources)
-        }
 
         override fun addOrRemove(id: Int, joke: Joke): JokeUi {
             realm.provideRealm().let {
                 val jokeCached = it.where(JokeCache::class.java).equalTo("id", id).findFirst()
                 if (jokeCached == null) {
                     it.executeTransaction { realm ->
-                        val jokeCache = joke.map(ToCache())
+                        val jokeCache = joke.map(mapper)
                         realm.insert(jokeCache)
                     }
-                    return joke.map(ToFavoriteUi())
+                    return joke.map(toFavorite)
                 } else {
                     it.executeTransaction {
                         jokeCached.deleteFromRealm()
                     }
-                    return joke.map(ToBaseUi())
+                    return joke.map(toBaseUi)
                 }
             }
         }
