@@ -32,22 +32,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         val jokeUiCallback = object : JokeUiCallback {
-            override fun provideText(text: String) = runOnUiThread {
+            override fun provideText(text: String) {
                 binding.actionButton.isEnabled = true
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.textView.text = text
             }
 
-            override fun provideIconResId(iconResId: Int) = runOnUiThread {
+            override fun provideIconResId(iconResId: Int) {
                 binding.favoriteButton.setImageResource(iconResId)
             }
         }
 
         viewModel.init(jokeUiCallback)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.clear()
     }
 }

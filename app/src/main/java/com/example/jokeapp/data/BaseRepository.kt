@@ -13,7 +13,7 @@ class BaseRepository(
 
     private var jokeTemporary: Joke? = null
 
-    override fun fetch(): JokeResult {
+    override suspend fun fetch(): JokeResult {
         val jokeResult = if (getJokeFromCache)
             cacheDataSource.fetch()
         else
@@ -25,7 +25,7 @@ class BaseRepository(
         return jokeResult
     }
 
-    override fun changeJokeStatus(): JokeUi = jokeTemporary!!.map(change)
+    override suspend fun changeJokeStatus(): JokeUi = jokeTemporary!!.map(change)
 
     private var getJokeFromCache = false
 

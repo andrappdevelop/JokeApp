@@ -21,7 +21,7 @@ interface CloudDataSource : DataSource {
             Error.ServiceUnavailable(manageResources)
         }
 
-        override fun fetch(): JokeResult = try {
+        override suspend fun fetch(): JokeResult = try {
             val response = jokeService.joke().execute()
             JokeResult.Success(response.body()!!, false)
         } catch (e: Exception) {

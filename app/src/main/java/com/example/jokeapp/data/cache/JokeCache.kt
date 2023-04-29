@@ -11,5 +11,5 @@ open class JokeCache : RealmObject(), Joke {
     var punchline: String = ""
     var type: String = ""
 
-    override fun <T> map(mapper: Joke.Mapper<T>): T = mapper.map(type, text, punchline, id)
+    override suspend fun <T> map(mapper: Joke.Mapper<T>): T = mapper.map(type, text, punchline, id)
 }
