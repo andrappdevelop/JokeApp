@@ -6,6 +6,8 @@ import com.example.jokeapp.data.Repository
 import com.example.jokeapp.data.cache.JokeResult
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Before
 import org.junit.Test
@@ -17,7 +19,6 @@ class MainViewModelTest {
     private lateinit var toFavoriteMapper: FakeMapper
     private lateinit var toBaseMapper: FakeMapper
     private lateinit var jokeUiCallback: FakeJokeUiCallback
-    private lateinit var dispatcherList: DispatcherList
 
     @Before
     fun setUp() {
@@ -25,9 +26,13 @@ class MainViewModelTest {
         toFavoriteMapper = FakeMapper(true)
         toBaseMapper = FakeMapper(false)
         jokeUiCallback = FakeJokeUiCallback()
-        dispatcherList = FakeDispatchers()
 
-        viewModel = MainViewModel(repository, toFavoriteMapper, toBaseMapper, dispatcherList)
+        viewModel = MainViewModel(
+            repository,
+            toFavoriteMapper,
+            toBaseMapper,
+            FakeHandleUi(FakeDispatchers())
+        )
         viewModel.init(jokeUiCallback)
     }
 
@@ -144,6 +149,18 @@ private class FakeDispatchers : DispatcherList {
     override fun io(): CoroutineDispatcher = dispatcher
 
     override fun ui(): CoroutineDispatcher = dispatcher
+}
+
+private class FakeHandleUi(private val dispatcherList: DispatcherList) : HandleUi {
+    override fun handle(
+        coroutineScope: CoroutineScope,
+        jokeUiCallback: JokeUiCallback,
+        block: suspend () -> JokeUi
+    ) {
+        coroutineScope.launch(dispatcherList.io()) {
+            block.invoke().show(jokeUiCallback)
+        }
+    }
 }
 
 private class FakeMapper(
