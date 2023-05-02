@@ -1,13 +1,13 @@
 package com.example.jokeapp
 
 import com.example.jokeapp.data.Error
-import com.example.jokeapp.data.Repository
-import com.example.jokeapp.data.ResultCallback
-import com.example.jokeapp.presentation.JokeUi
-import com.example.jokeapp.presentation.MainViewModel
-import com.example.jokeapp.presentation.JokeUiCallback
-import junit.framework.TestCase.assertEquals
-import org.junit.Test
+//import com.example.jokeapp.data.Repository
+//import com.example.jokeapp.data.ResultCallback
+//import com.example.jokeapp.presentation.JokeUi
+//import com.example.jokeapp.presentation.MainViewModel
+//import com.example.jokeapp.presentation.JokeUiCallback
+//import junit.framework.TestCase.assertEquals
+//import org.junit.Test
 
 
 class MainViewRepositoryTest {
