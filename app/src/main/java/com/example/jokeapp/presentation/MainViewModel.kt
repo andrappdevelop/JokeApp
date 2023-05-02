@@ -9,7 +9,6 @@ import com.example.jokeapp.data.Repository
 import com.example.jokeapp.data.ToBaseUi
 import com.example.jokeapp.data.ToFavoriteUi
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,17 +17,21 @@ class MainViewModel(
     private val repository: Repository<JokeUi, Error>,
     private val toFavorite: Joke.Mapper<JokeUi> = ToFavoriteUi(),
     private val toBaseUi: Joke.Mapper<JokeUi> = ToBaseUi(),
-    private val handleUi: HandleUi = HandleUi.Base(DispatcherList.Base())
-) : ViewModel() {
+    dispatcherList: DispatcherList = DispatcherList.Base()
+) : BaseViewModel(dispatcherList) {
 
     private var jokeUiCallback: JokeUiCallback = JokeUiCallback.Empty()
 
-    fun getJoke() = handleUi.handle(viewModelScope, jokeUiCallback) {
-        val result = repository.fetch()
-        if (result.isSuccessful())
-            result.map(if (result.toFavorite()) toFavorite else toBaseUi)
-        else
-            JokeUi.Failed(result.errorMessage())
+    private val blockUi: suspend (JokeUi) -> Unit = { it.show(jokeUiCallback) }
+
+    fun getJoke() {
+        handle({
+            val result = repository.fetch()
+            if (result.isSuccessful())
+                result.map(if (result.toFavorite()) toFavorite else toBaseUi)
+            else
+                JokeUi.Failed(result.errorMessage())
+        }, blockUi)
     }
 
     override fun onCleared() {
@@ -45,9 +48,9 @@ class MainViewModel(
     }
 
     fun changeJokeStatus() =
-        handleUi.handle(viewModelScope, jokeUiCallback) {
+        handle({
             repository.changeJokeStatus()
-        }
+        }, blockUi)
 }
 
 interface JokeUiCallback {
@@ -75,26 +78,17 @@ interface DispatcherList {
     }
 }
 
-interface HandleUi {
+abstract class BaseViewModel(
+    private val dispatcherList: DispatcherList
+) : ViewModel() {
 
-    fun handle(
-        coroutineScope: CoroutineScope,
-        jokeUiCallback: JokeUiCallback,
-        block: suspend () -> JokeUi
-    )
-
-    class Base(private val dispatcherList: DispatcherList) : HandleUi {
-        override fun handle(
-            coroutineScope: CoroutineScope,
-            jokeUiCallback: JokeUiCallback,
-            block: suspend () -> JokeUi
-        ) {
-            coroutineScope.launch(dispatcherList.io()) {
-                val jokeUi = block.invoke()
-                withContext(dispatcherList.ui()) {
-                    jokeUi.show(jokeUiCallback)
-                }
-            }
+    fun <T> handle(
+        blockIo: suspend () -> T,
+        blockUi: suspend (T) -> Unit
+    ) = viewModelScope.launch(dispatcherList.io()) {
+        val result = blockIo.invoke()
+        withContext(dispatcherList.ui()) {
+            blockUi.invoke(result)
         }
     }
 }
