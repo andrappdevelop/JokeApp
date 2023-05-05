@@ -6,6 +6,7 @@ import com.example.jokeapp.data.cache.CacheDataSource
 import com.example.jokeapp.data.cache.ProvideRealm
 import com.example.jokeapp.data.cloud.CloudDataSource
 import com.example.jokeapp.data.cloud.JokeService
+import com.example.jokeapp.presentation.JokeCommunication
 import com.example.jokeapp.presentation.MainViewModel
 import com.example.jokeapp.presentation.ManageResources
 import io.realm.Realm
@@ -25,6 +26,7 @@ class JokeApp : Application() {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         viewModel = MainViewModel(
+            JokeCommunication.Base(),
             BaseRepository(
                 CloudDataSource.Base(
                     retrofit.create(JokeService::class.java),

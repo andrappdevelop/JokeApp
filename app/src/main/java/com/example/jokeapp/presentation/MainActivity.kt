@@ -41,6 +41,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.init(jokeUiCallback)
+        viewModel.observe(this) {
+            it.show(jokeUiCallback)
+        }
     }
 }
